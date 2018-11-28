@@ -1,0 +1,270 @@
+* Initialization Tweaks
+** Initial setup defaults
+   #+BEGIN_SRC emacs-lisp  
+   (setq inhibit-startup-message t)              ;;Prevents the initial load screen 
+   (tool-bar-mode -1)                            ;;Disables the toolbar
+   (fset 'yes-or-no-p 'y-or-n-p)                 ;;Allows using y/n for yes/no
+   (global-set-key (kbd "<f5>") 'revert-buffer)  ;;Allows reloading a buffer using F5 directly
+   #+END_SRC
+** Enable Key-chords
+   Allows using simultaneous key presses to do custom functions
+   #+BEGIN_SRC emacs-lisp
+     (use-package key-chord
+       :ensure t
+       :init
+       (key-chord-define-global "lk" 'forward-char)
+       :config
+       (require 'key-chord)
+       (key-chord-mode 1))
+   #+END_SRC
+** Muting the bell in Emacs
+   Mute the bell in emacs
+   #+BEGIN_SRC emacs-lisp  
+   (defun my-bell-function ())  ;;Defines an arbitrary function which does nothing
+   (setq ring-bell-function 'my-bell-function) ;; remaps the bell function to the above arbitraty function to do nothing
+   (setq visible-bell nil)
+   #+END_SRC
+
+** Highlight current line
+   #+BEGIN_SRC 
+   (global-hl-line-mode t)
+   #+END_SRC
+
+** Auto-reload the file if it changes on the disk
+   #+BEGIN_SRC 
+   (global-auto-revert-mode 1)
+   (setq auto-revert-verbose nil)
+   #+END_SRC
+   
+** Auto-wrap long lines
+   #+BEGIN_SRC emacs-lisp
+     (global-set-key (kbd "C-M-q") 'visual-line-mode)  ;;Allows toggle of word wrapping
+   #+END_SRC
+   
+* Installing Packages
+** Multiple-Cursors
+   #+BEGIN_SRC emacs-lisp
+   (use-package multiple-cursors
+   :ensure t
+   :bind (("C-S-c C-S-c" . mc/edit-lines)
+   ("C->" . mc/mark-next-like-this)
+   ("C-<" . mc/mark-previous-like-this)
+   ("C-c C-<" . mc/mark-all-like-this)
+   ("C-c C-* C-*" . mc/mark-more-like-this)
+   ("C-* i" . mc/insert-numbers)
+   ("C-* s" . mc/sort-regions)
+   ("C-* r" . mc/reverse-regions)
+   ("M-<mouse-1>" . mc/add-cursor-on-click))
+   :init
+   (global-unset-key (kbd "M-<down-mouse-1>"))
+   :config
+   (require 'mc-extras))
+   #+END_SRC
+*** MC-extras - Additional functionalities for Multiple cursors 
+   #+BEGIN_SRC emacs-lisp
+    (use-package mc-extras
+    :ensure t
+    :commands 
+    (mc/compare-chars mc/compare-chars-backward mc/compare-chars-forward
+    mc/cua-rectangle-to-multiple-cursors
+     mc/remove-current-cursor mc/remove-duplicated-cursors)
+     :config
+     (progn
+     (bind-keys :map mc/keymap
+     ("C-. C-d" . mc/remove-current-cursor)
+     ("C-. d" . mc/remove-duplicated-cursors)
+     ("C-. =" . mc/compare-chars))
+     (eval-after-load 'cua-base
+     '(bind-key "C-. C-," 'mc/cua-rectangle-to-multiple-cursors cua--rectangle-keymap))))
+     #+END_SRC
+;;** Par-edit
+   For managing paranthesis everywhere (editing, and organizing)
+   #+BEGIN_SRC emacs-lisp
+   
+   
+   #+END_SRC
+** Changing theme
+   #+BEGIN_SRC emacs-lisp
+   (use-package monokai-theme
+   :ensure t
+   :config (load-theme 'monokai t))
+
+   #+END_SRC
+** Which-key
+   ;; Helps information on the keys 
+   #+BEGIN_SRC emacs-lisp  
+   (use-package which-key
+     :ensure t
+     :config (which-key-mode))
+   #+END_SRC
+
+** Org-mode stuff
+*** Org-Mode Bullets
+     #+BEGIN_SRC emacs-lisp  
+     (use-package org-bullets
+     :ensure t
+     :config
+     (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+     #+END_SRC
+** I-do mode
+   ;;Interactive-do - Allows more informative interaction in the mode-bar
+   #+BEGIN_SRC emacs-lisp  
+   (setq indo-enable-flex-matching t)
+   (setq ido-everywhere t)
+   (ido-mode 1)
+   #+END_SRC
+
+** iBuffer
+   ;; A nicer buffer listing to manage buffers with a nicer interface
+#+BEGIN_SRC emacs-lisp  
+(defalias 'list-buffers 'ibuffer-other-window)
+#+END_SRC
+
+** Tab-bar for tabbed browsing
+   Adds tabs to scroll using mouse between buffers
+#+BEGIN_SRC emacs-lisp  
+(use-package tabbar
+  :ensure t
+  :config
+  (tabbar-mode 1))
+#+END_SRC
+
+** Winner-mode
+   Manage (go forward and backward) window configurations
+#+BEGIN_SRC emacs-lisp  
+(winner-mode 1)
+#+END_SRC
+
+** ace-window - To move between the windows
+   Easier way to move between the windows
+#+BEGIN_SRC emacs-lisp
+(use-package ace-window
+  :ensure t
+  :init
+  (progn
+    (global-set-key [remap other-window] 'ace-window)
+    (custom-set-faces
+     '(aw-leading-char-face
+       ((t (:inherit ace-jump-face-foreground :height 3.0))))) ;;Makes the window name more distinguishable
+    ))
+#+END_SRC
+
+** Counsel - for finding (Browsing files)
+   Alternative way for finding files (Modified key map for a better kill ring)
+   #+BEGIN_SRC emacs-lisp  
+     (use-package counsel
+       :ensure t
+       :bind ;;Makes the yanking-kill-ring so much cooler!!
+       (("M-y" . counsel-yank-pop)
+        :map ivy-minibuffer-map
+        ("M-y" . ivy-next-line)))
+   #+END_SRC
+
+** Swiper - for search
+   A better way for moving around and search than the default
+#+BEGIN_SRC emacs-lisp  
+(use-package swiper
+  :ensure t
+  :bind (("C-s" . swiper)
+	 ("C-r" . swiper)
+	 ("C-c C-r" . ivy-resume)
+	 ("M-x" . counsel-M-x)
+	 ("C-x C-f" . counsel-find-file))
+  :config
+  (progn
+    (ivy-mode 1)
+    (setq ivy-use-virtual-buffers t)
+    (setq enable-recursive-minibuffers t)
+    (global-set-key (kbd "<f1> f") 'counsel-describe-function)
+    (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
+    (global-set-key (kbd "<f1> l") 'counsel-find-library)
+    (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
+    ))
+#+END_SRC
+
+** Avy - Better Ace-jump-mode
+   A superior ace-jump-mode to allow jumping within anywhere in the buffer
+#+BEGIN_SRC emacs-lisp  
+(use-package avy
+  :ensure t
+  :bind ("M-s" . avy-goto-char))
+#+END_SRC
+
+;;** Company - Autocomletion
+   Allows autocompletion for most packages
+#+BEGIN_SRC emacs-lisp
+(use-package company
+  :ensure t
+  :defer 5
+  :config
+  (global-company-mode t))
+
+#+END_SRC
+** AutoComplete - Autocomletion
+   Allows autocompletion for most packages
+#+BEGIN_SRC emacs-lisp
+  (use-package auto-complete
+    :ensure t
+    :init
+    (progn
+      (ac-config-default)
+      (global-auto-complete-mode t)
+      ))
+#+END_SRC
+** Flycheck - Syntax check
+   Checks the syntax for most programming environments (not Matlab)
+   #+BEGIN_SRC emacs-lisp
+    (use-package flycheck
+      :ensure t
+      :init
+      (global-flycheck-mode t))
+   #+END_SRC
+** YASnippet - For inserting snippets
+   #+BEGIN_SRC emacs-lisp
+   (use-package yasnippet
+   :ensure t
+   :init
+   (yas-global-mode 1))
+   #+END_SRC
+** Expand Region Tool
+   Expands the selected region to the next set of braces
+   #+BEGIN_SRC emacs-lisp
+     (use-package expand-region
+       :ensure t
+       :config
+       (global-set-key (kbd "C-=") 'er/expand-region))
+
+   #+END_SRC
+** I-edit
+** Try package
+   Allows trying a package without using it
+   #+BEGIN_SRC emacs-lisp  
+   (use-package try
+   :ensure t)
+   #+END_SRC
+** Packages
+;;An autocomplete package - Company
+;;(use-package
+
+#+BEGIN_SRC 
+;; Max time delay between two key presses to be considered a key chord
+    (setq key-chord-two-keys-delay 0.1) ; default 0.1
+    
+    ;; Max time delay between two presses of the same key to be considered a key chord.
+    ;; Should normally be a little longer than `key-chord-two-keys-delay'.
+    (setq key-chord-one-key-delay 0.2) ; default 0.2
+    
+    (key-chord-define-global "fg" 'forward-char)
+#+END_SRC
+* Org-Mode specific
+** defining a new class: Book
+   #+BEGIN_SRC emacs-lisp
+(with-eval-after-load 'ox-latex
+   (add-to-list 'org-latex-classes
+                '("rj_thesis"
+                  "\\documentclass{report}"
+                  ("\\chapter{%s}" . "\\chapter*{%s}")
+                  ("\\section{%s}" . "\\section*{%s}")
+                  ("\\subsection{%s}" . "\\subsection*{%s}")
+                  ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
+   #+END_SRC
