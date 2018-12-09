@@ -4,5 +4,5 @@
 (load user-init-file)
 
 ;; Loading the compiled org-mode correctly for the emacs installation
-(add-to-list 'load-path (concat (getenv "EMACS_SRC_DIR") "/lisp"))
-(add-to-list 'load-path (concat (getenv "EMACS_SRC_DIR") "/contrib/lisp" t))
+(add-to-list 'load-path (concat (getenv "EMACS_SRC_DIR") "/org-mode/lisp"))
+(add-to-list 'load-path (concat (getenv "EMACS_SRC_DIR") "/org-mode/contrib/lisp" t))
