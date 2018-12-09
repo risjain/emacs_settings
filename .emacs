@@ -2,3 +2,7 @@
 (setq user-init-file (concat (getenv "EMACS_CFG_DIR") "/.emacs.d/init.el"))
 (setq user-emacs-directory (concat (getenv "EMACS_CFG_DIR") "/.emacs.d/"))
 (load user-init-file)
+
+;; Loading the compiled org-mode correctly for the emacs installation
+(add-to-list 'load-path (concat (getenv "EMACS_SRC_DIR") "/lisp"))
+(add-to-list 'load-path (concat (getenv "EMACS_SRC_DIR") "/contrib/lisp" t))
