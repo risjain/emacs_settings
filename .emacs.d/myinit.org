@@ -6,6 +6,23 @@
    (fset 'yes-or-no-p 'y-or-n-p)                 ;;Allows using y/n for yes/no
    (global-set-key (kbd "<f5>") 'revert-buffer)  ;;Allows reloading a buffer using F5 directly
    #+END_SRC
+** Auto-reload the file if it changes on the disk
+   #+BEGIN_SRC 
+   (global-auto-revert-mode 1)
+   (setq auto-revert-verbose nil)
+   #+END_SRC
+** Auto-wrap long lines
+   #+BEGIN_SRC emacs-lisp
+   (visual-line-mode t)  ;;Enables visual line mode (word wrap) by default
+   (global-set-key (kbd "C-M-q") 'visual-line-mode)  ;;Allows toggle of word wrapping
+   #+END_SRC
+** Muting the bell in Emacs
+   Mute the bell in emacs
+   #+BEGIN_SRC emacs-lisp  
+   (defun my-bell-function ())  ;;Defines an arbitrary function which does nothing
+   (setq ring-bell-function 'my-bell-function) ;; remaps the bell function to the above arbitraty function to do nothing
+   (setq visible-bell nil)
+   #+END_SRC
 ** Enable Key-chords
    Allows using simultaneous key presses to do custom functions
    #+BEGIN_SRC emacs-lisp
@@ -17,31 +34,94 @@
        (require 'key-chord)
        (key-chord-mode 1))
    #+END_SRC
-** Muting the bell in Emacs
-   Mute the bell in emacs
-   #+BEGIN_SRC emacs-lisp  
-   (defun my-bell-function ())  ;;Defines an arbitrary function which does nothing
-   (setq ring-bell-function 'my-bell-function) ;; remaps the bell function to the above arbitraty function to do nothing
-   (setq visible-bell nil)
-   #+END_SRC
-
 ** Highlight current line
    #+BEGIN_SRC 
    (global-hl-line-mode t)
    #+END_SRC
-
-** Auto-reload the file if it changes on the disk
-   #+BEGIN_SRC 
-   (global-auto-revert-mode 1)
-   (setq auto-revert-verbose nil)
-   #+END_SRC
-   
-** Auto-wrap long lines
+* Changing theme
+  #+BEGIN_SRC emacs-lisp
+  (use-package monokai-theme
+  :ensure t
+  :config (load-theme 'monokai t))
+  #+END_SRC
+* Installing Default Packages
+** YASnippet - For inserting snippets
    #+BEGIN_SRC emacs-lisp
-     (global-set-key (kbd "C-M-q") 'visual-line-mode)  ;;Allows toggle of word wrapping
+   (use-package yasnippet
+   :ensure t
+   :init
+   (yas-global-mode 1))
    #+END_SRC
+* Org-Mode specific
+** Org-capture
+   #+BEGIN_SRC emacs-lisp
+   (custom-set-variables
+    '(org-directory (concat (getenv "ORGANIZER") "/overview/"))
+    '(org-default-notes-file (concat org-directory "/notes.org"))
+    '(org-export-html-postamble nil)       ;; [[https://orgmode.org/manual/HTML-preamble-and-postamble.html][source]] - To disable postamble
+    '(org-hide-leading-stars t)
+    '(org-startup-folded (quote overview)) ;; Start in overview mode
+    '(org-startup-indented t)  ;; Start up in indented mode
+    )
+
+   (global-set-key "C-c a" 'org-agenda)
+   (setq org-agenda-start-on-weekday t)
+   (setq org-agenda-custom-commands
+         '(("c" "Simple agenda view"
+         ((agenda "")
+         (alltodo "")))))
    
-* Installing Packages
+   (global-set-key (kbd "C-c c") 'org-capture)
+   
+   (setq org-agenda-files (list (concat org-directory "/gcal.org")
+       (concat org-directory "/soe-cal.org")
+       (concat org-directory "/i.org")
+       (concat org-directory "/schedule.org")))
+   (setq org-capture-templates
+        '(("a" "Appointment" entry (file  (concat org-directory "/gcal.org" ))
+	   "* %?\n\n%^T\n\n:PROPERTIES:\n\n:END:\n\n")
+	  ("l" "Link" entry (file+headline (concat org-directory "/links.org" "Links"))
+	   "* %? %^L %^g \n%T" :prepend t)
+	  ("b" "Blog idea" entry (file+headline (concat org-directory "/i.org" "Blog Topics:"))
+	   "* %?\n%T" :prepend t)
+	  ("t" "To Do Item" entry (file+headline (concat org-directory "/i.org" "To Do and Notes"))
+      	   "* TODO %?\n%u" :prepend t)
+  	  ("m" "Mail To Do" entry (file+headline (concat org-directory "/i.org" "To Do and Notes"))
+  	   "* TODO %a\n %?" :prepend t)
+  	  ("g" "GMail To Do" entry (file+headline (concat org-directory "/i.org" "To Do and Notes"))
+  	   "* TODO %^L\n %?" :prepend t)
+  	  ("n" "Note" entry (file+headline (concat org-directory "/i.org" "Notes"))
+           "* %u %? " :prepend t)
+  	  ))
+
+;;   (defadvice org-capture-finalize 
+;;       (after delete-capture-frame activate)  
+;;   "Advise capture-finalize to close the frame"  
+;;   (if (equal "capture" (frame-parameter nil 'name))  
+;;   (delete-frame)))
+;;
+;;   (defadvice org-capture-destroy 
+;;       (after delete-capture-frame activate)  
+;;   "Advise capture-destroy to close the frame"  
+;;   (if (equal "capture" (frame-parameter nil 'name))  
+;;   (delete-frame)))  
+;;  
+;;   (use-package noflet
+;;   :ensure t )
+;;   (defun make-capture-frame ()
+;;   "Create a new frame and run org-capture."
+;;   (interactive)
+;;   (make-frame '((name . "capture")))
+;;   (select-frame-by-name "capture")
+;;   (delete-other-windows)
+;;   (noflet ((switch-to-buffer-other-window (buf) (switch-to-buffer buf)))
+;;       (org-capture)))
+;;
+;;   (define-key org-mode-map (kbd "C-c >") (lambda () (interactive (org-time-stamp-inactive))))
+;;   
+;;   (use-package htmlize :ensure t)                
+   #+END_SRC
+* Custom Installing Packages
 ** Multiple-Cursors
    #+BEGIN_SRC emacs-lisp
    (use-package multiple-cursors
@@ -83,13 +163,6 @@
    
    
    #+END_SRC
-** Changing theme
-   #+BEGIN_SRC emacs-lisp
-   (use-package monokai-theme
-   :ensure t
-   :config (load-theme 'monokai t))
-
-   #+END_SRC
 ** Which-key
    ;; Helps information on the keys 
    #+BEGIN_SRC emacs-lisp  
@@ -118,15 +191,6 @@
    ;; A nicer buffer listing to manage buffers with a nicer interface
 #+BEGIN_SRC emacs-lisp  
 (defalias 'list-buffers 'ibuffer-other-window)
-#+END_SRC
-
-** Tab-bar for tabbed browsing
-   Adds tabs to scroll using mouse between buffers
-#+BEGIN_SRC emacs-lisp  
-(use-package tabbar
-  :ensure t
-  :config
-  (tabbar-mode 1))
 #+END_SRC
 
 ** Winner-mode
@@ -219,13 +283,6 @@
       :init
       (global-flycheck-mode t))
    #+END_SRC
-** YASnippet - For inserting snippets
-   #+BEGIN_SRC emacs-lisp
-   (use-package yasnippet
-   :ensure t
-   :init
-   (yas-global-mode 1))
-   #+END_SRC
 ** Expand Region Tool
    Expands the selected region to the next set of braces
    #+BEGIN_SRC emacs-lisp
@@ -256,15 +313,25 @@
     
     (key-chord-define-global "fg" 'forward-char)
 #+END_SRC
-* Org-Mode specific
-** defining a new class: Book
-   #+BEGIN_SRC emacs-lisp
-(with-eval-after-load 'ox-latex
-   (add-to-list 'org-latex-classes
-                '("rj_thesis"
-                  "\\documentclass{report}"
-                  ("\\chapter{%s}" . "\\chapter*{%s}")
-                  ("\\section{%s}" . "\\section*{%s}")
-                  ("\\subsection{%s}" . "\\subsection*{%s}")
-                  ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
-   #+END_SRC
+** Tab-bar for tabbed browsing
+   Adds tabs to scroll using mouse between buffers
+#+BEGIN_SRC emacs-lisp  
+(use-package tabbar
+  :ensure t
+  :config
+  (tabbar-mode 1))
+#+END_SRC
+
+* Custom Org-mode specific
+** Defining a new class: Book
+    #+BEGIN_SRC emacs-lisp
+ (with-eval-after-load 'ox-latex
+    (add-to-list 'org-latex-classes
+                 '("rj_thesis"
+                   "\\documentclass{report}"
+                   ("\\chapter{%s}" . "\\chapter*{%s}")
+                   ("\\section{%s}" . "\\section*{%s}")
+                   ("\\subsection{%s}" . "\\subsection*{%s}")
+                   ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
+    #+END_SRC   
+
