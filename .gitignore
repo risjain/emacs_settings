@@ -1,11 +1,14 @@
 # Ignore everything
-*
+/*
 
 # But not these files...
 !.gitignore
+!.README.md
+
+# EMACS Settings files
 !.emacs
-!.emacs.d/myinit.org
-!.emacs.d/myinit.el
-!.emacs.d/init.el
-!.emacs.d/myinit_orig.org
+!**/myinit.org
+!**/myinit.el
+!**/init.el
+!**/myinit_orig.org
 
