@@ -48,7 +48,13 @@ mc/cua-rectangle-to-multiple-cursors
  (eval-after-load 'cua-base
  '(bind-key "C-. C-," 'mc/cua-rectangle-to-multiple-cursors cua--rectangle-keymap))))
 
+(use-package smartparens
+ :ensure t
+ :config
 
+ (setq sp-show-pair-from-inside nil)
+ (require 'smartparens-config)
+ :diminish smartparens-mode)
 
 (use-package monokai-theme
 :ensure t
@@ -57,11 +63,6 @@ mc/cua-rectangle-to-multiple-cursors
 (use-package which-key
   :ensure t
   :config (which-key-mode))
-
-(use-package org-bullets
-:ensure t
-:config
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 
 (setq indo-enable-flex-matching t)
 (setq ido-everywhere t)
@@ -76,15 +77,10 @@ mc/cua-rectangle-to-multiple-cursors
 
 (winner-mode 1)
 
-(use-package ace-window
-  :ensure t
-  :init
-  (progn
-    (global-set-key [remap other-window] 'ace-window)
-    (custom-set-faces
-     '(aw-leading-char-face
-       ((t (:inherit ace-jump-face-foreground :height 3.0))))) ;;Makes the window name more distinguishable
-    ))
+(use-package yasnippet
+:ensure t
+:init
+(yas-global-mode 1))
 
 (use-package counsel
   :ensure t
@@ -96,10 +92,10 @@ mc/cua-rectangle-to-multiple-cursors
 (use-package swiper
   :ensure t
   :bind (("C-s" . swiper)
-	 ("C-r" . swiper)
-	 ("C-c C-r" . ivy-resume)
-	 ("M-x" . counsel-M-x)
-	 ("C-x C-f" . counsel-find-file))
+     ("C-r" . swiper)
+     ("C-c C-r" . ivy-resume)
+     ("M-x" . counsel-M-x)
+     ("C-x C-f" . counsel-find-file))
   :config
   (progn
     (ivy-mode 1)
@@ -129,16 +125,6 @@ mc/cua-rectangle-to-multiple-cursors
     (global-auto-complete-mode t)
     ))
 
-(use-package flycheck
-  :ensure t
-  :init
-  (global-flycheck-mode t))
-
-(use-package yasnippet
-:ensure t
-:init
-(yas-global-mode 1))
-
 (use-package expand-region
   :ensure t
   :config
@@ -146,6 +132,72 @@ mc/cua-rectangle-to-multiple-cursors
 
 (use-package try
 :ensure t)
+
+(use-package flycheck
+  :ensure t
+  :init
+  (global-flycheck-mode t))
+
+(use-package ace-window
+  :ensure t
+  :init
+  (progn
+    (global-set-key [remap other-window] 'ace-window)
+    (custom-set-faces
+     '(aw-leading-char-face
+       ((t (:inherit ace-jump-face-foreground :height 3.0))))) ;;Makes the window name more distinguishable
+    ))
+
+(use-package org-bullets
+:ensure t
+:config
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+
+(use-package org-ref
+  :ensure t
+  :after org
+  :init
+  (setq reftex-default-bibliography '((concat (getenv "DROPBOX_DIR") "/Research/references.bib")))
+  (setq org-ref-bibliography-notes (concat (getenv "DROPBOX_DIR") "/Research/notes/notes.org")
+        org-ref-default-bibliography '((concat (getenv "DROPBOX_DIR") "/Research/references.bib"))
+        org-ref-pdf-directory (concat (getenv "DROPBOX_DIR") "/papers/"))
+
+  (setq helm-bibtex-bibliography (concat (getenv "DROPBOX_DIR") "/Research/references.bib"))
+  (setq helm-bibtex-library-path (concat (getenv "DROPBOX_DIR") "/papers/"))
+
+  (setq helm-bibtex-pdf-open-function
+        (lambda (fpath)
+          (start-process "open" "*open*" "open" fpath)))
+
+  (setq helm-bibtex-notes-path (concat (getenv "DROPBOX_DIR") "/Research/notes/notes.org"))
+  :config
+  (key-chord-define-global "uu" 'org-ref-cite-hydra/body)
+  ;; variables that control bibtex key format for auto-generation
+  ;; I want firstauthor-year-title-words
+  ;; this usually makes a legitimate filename to store pdfs under.
+  (setq bibtex-autokey-year-length 4
+        bibtex-autokey-name-year-separator "-"
+        bibtex-autokey-year-title-separator "-"
+        bibtex-autokey-titleword-separator "-"
+        bibtex-autokey-titlewords 2
+        bibtex-autokey-titlewords-stretch 1
+        bibtex-autokey-titleword-length 5))
+
+(use-package org-ref
+
+:config
+(require 'org-ref)
+(key-chord-define-global "uu" 'org-ref-cite-hydra/body)
+;; variables that control bibtex key format for auto-generation
+;; I want firstauthor-year-title-words
+;; this usually makes a legitimate filename to store pdfs under.
+(setq bibtex-autokey-year-length 4
+     bibtex-autokey-name-year-separator "-"
+     bibtex-autokey-year-title-separator "-"
+     bibtex-autokey-titleword-separator "-"
+     bibtex-autokey-titlewords 2
+     bibtex-autokey-titlewords-stretch 1
+     bibtex-autokey-titleword-length 5))
 
 (with-eval-after-load 'ox-latex
    (add-to-list 'org-latex-classes
