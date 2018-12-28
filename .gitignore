@@ -4,8 +4,8 @@
 # But not these files...
 !.gitignore
 !.emacs
-!*/.emacs.d/myinit.org
-!*/.emacs.d/myinit.el
-!*/.emacs.d/init.el
-!*/.emacs.d/myinit_orig.org
+!.emacs.d/myinit.org
+!.emacs.d/myinit.el
+!.emacs.d/init.el
+!.emacs.d/myinit_orig.org
 
