@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: latex_eq
+# key: latex_eq
+# --
+
+\begin{equation} 
+    \label{eq:${1:tag}}
+    $2
+\end{equation}
+$0

@@ -11,4 +11,6 @@
 !**/myinit.el
 !**/init.el
 !**/myinit_orig.org
-!**/snippets/*
+!/.emacs.d
+/.emacs.d/*
+!/.emacs.d/snippets
