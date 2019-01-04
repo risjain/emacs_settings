@@ -48,14 +48,6 @@ mc/cua-rectangle-to-multiple-cursors
  (eval-after-load 'cua-base
  '(bind-key "C-. C-," 'mc/cua-rectangle-to-multiple-cursors cua--rectangle-keymap))))
 
-(use-package smartparens
- :ensure t
- :config
-
- (setq sp-show-pair-from-inside nil)
- (require 'smartparens-config)
- :diminish smartparens-mode)
-
 (use-package monokai-theme
 :ensure t
 :config (load-theme 'monokai t))
@@ -107,46 +99,21 @@ mc/cua-rectangle-to-multiple-cursors
     (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
     ))
 
-(use-package avy
-  :ensure t
-  :bind ("M-s" . avy-goto-char))
-
-(use-package company
-  :ensure t
-  :defer 5
-  :config
-  (global-company-mode t))
-
-(use-package auto-complete
-  :ensure t
-  :init
-  (progn
-    (ac-config-default)
-    (global-auto-complete-mode t)
-    ))
-
 (use-package expand-region
   :ensure t
   :config
   (global-set-key (kbd "C-=") 'er/expand-region))
 
-(use-package try
-:ensure t)
+(use-package smartparens
+ :ensure t
+ :config
 
-(use-package flycheck
-  :ensure t
-  :init
-  (global-flycheck-mode t))
+ (setq sp-show-pair-from-inside nil)
+ (require 'smartparens-config)
+ (smartparens-global-mode t)
+ (show-smartparens-global-mode t)
 
-(use-package ace-window
-  :ensure t
-  :init
-  (progn
-    (global-set-key [remap other-window] 'ace-window)
-    (custom-set-faces
-     '(aw-leading-char-face
-       ((t (:inherit ace-jump-face-foreground :height 3.0))))) ;;Makes the window name more distinguishable
-    ))
+ :diminish smartparens-mode)
 
 (use-package org-bullets
 :ensure t
