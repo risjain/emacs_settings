@@ -203,6 +203,7 @@ mc/cua-rectangle-to-multiple-cursors
 (global-set-key (kbd "\C-c a") 'org-agenda)
 
 (setq org-agenda-files (list (concat org-directory "/calendar.org")))
+ :diminish smartparens-mode)
 
 (use-package org-bullets
 :ensure t

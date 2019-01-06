@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: latex_fig
+# key: latex_fig
+# --
+
+#+CAPTION: \label{fig:${1:file}} $2
+#+ATTR_LATEX: :width \linewidth
+[[./fig/$1.png]]
+$0
+
