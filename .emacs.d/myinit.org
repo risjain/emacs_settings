@@ -12,9 +12,11 @@
      (use-package key-chord
        :ensure t
        :init
-       (key-chord-define-global "lk" 'forward-char)
+       (key-chord-define-global "vc" 'forward-char)
+       (key-chord-define-global "xc" 'backward-char)
        :config
        (require 'key-chord)
+       (setq key-chord-two-keys-delay 0.05) ; default 0.1
        (key-chord-mode 1))
    #+END_SRC
 ** Muting the bell in Emacs
@@ -172,10 +174,121 @@ Add tabs to scroll using mouse between buffers
     (require 'smartparens-config)
     (smartparens-global-mode t)
     (show-smartparens-global-mode t)
+    
+    ;; keybinding management
+    (define-key smartparens-mode-map (kbd "C-M-f") 'sp-forward-sexp)
+    (define-key smartparens-mode-map (kbd "C-M-b") 'sp-backward-sexp)
+    
+    (define-key smartparens-mode-map (kbd "C-M-d") 'sp-down-sexp)
+    (define-key smartparens-mode-map (kbd "C-M-a") 'sp-backward-down-sexp)
+    (define-key smartparens-mode-map (kbd "C-S-d") 'sp-beginning-of-sexp)
+    (define-key smartparens-mode-map (kbd "C-S-a") 'sp-end-of-sexp)
+    
+    (define-key smartparens-mode-map (kbd "C-M-e") 'sp-up-sexp)
+    (define-key smartparens-mode-map (kbd "C-M-u") 'sp-backward-up-sexp)
+    (define-key smartparens-mode-map (kbd "C-M-t") 'sp-transpose-sexp)
+    
+    (define-key smartparens-mode-map (kbd "C-M-n") 'sp-forward-hybrid-sexp)
+    (define-key smartparens-mode-map (kbd "C-M-p") 'sp-backward-hybrid-sexp)
+    
+    (define-key smartparens-mode-map (kbd "C-M-k") 'sp-kill-sexp)
+    (define-key smartparens-mode-map (kbd "C-M-w") 'sp-copy-sexp)
+    
+    (define-key smartparens-mode-map (kbd "M-<delete>") 'sp-unwrap-sexp)
+    (define-key smartparens-mode-map (kbd "M-<backspace>") 'sp-backward-unwrap-sexp)
+    
+    (define-key smartparens-mode-map (kbd "C-S-<right>") 'sp-forward-slurp-sexp)
+    (define-key smartparens-mode-map (kbd "C-S-<left>") 'sp-forward-barf-sexp)
+    (define-key smartparens-mode-map (kbd "C-M-<left>") 'sp-backward-slurp-sexp)
+    (define-key smartparens-mode-map (kbd "C-M-<right>") 'sp-backward-barf-sexp)
+    
+    (define-key smartparens-mode-map (kbd "M-D") 'sp-splice-sexp)
+    (define-key smartparens-mode-map (kbd "C-M-<delete>") 'sp-splice-sexp-killing-forward)
+    (define-key smartparens-mode-map (kbd "C-M-<backspace>") 'sp-splice-sexp-killing-backward)
+    (define-key smartparens-mode-map (kbd "C-S-<backspace>") 'sp-splice-sexp-killing-around)
+    
+    (define-key smartparens-mode-map (kbd "C-]") 'sp-select-next-thing-exchange)
+    (define-key smartparens-mode-map (kbd "C-<left_bracket>") 'sp-select-previous-thing)
+    (define-key smartparens-mode-map (kbd "C-M-]") 'sp-select-next-thing)
+    
+    (define-key smartparens-mode-map (kbd "M-F") 'sp-forward-symbol)
+    (define-key smartparens-mode-map (kbd "M-B") 'sp-backward-symbol)
+    
+    (define-key smartparens-mode-map (kbd "C-i") 'sp-change-inner)
+    (define-key smartparens-mode-map (kbd "M-i") 'sp-change-enclosing)
+    
+    (bind-key "C-c f" (lambda () (interactive) (sp-beginning-of-sexp 2)) smartparens-mode-map)
+    (bind-key "C-c b" (lambda () (interactive) (sp-beginning-of-sexp -2)) smartparens-mode-map)
 
+    
     :diminish smartparens-mode)
    #+END_SRC
 * Org-mode specific
+** General configuration
+   Defines default org-directory variables like org-directory, org-default-notes-file
+   #+BEGIN_SRC emacs-lisp
+   (custom-set-variables
+    '(org-directory (concat (getenv "DROPBOX_DIR") "/orgfiles"))
+    '(org-default-notes-file (concat org-directory "/worklog.org"))
+    '(org-export-html-postamble nil)
+    '(org-startup-indented-t)
+   )
+   #+END_SRC
+;;** Autocompletion for Org-mode
+;;   #+BEGIN_SRC emacs-lisp
+;;   (use-package org-ac
+;;    :ensure t
+;;    :init (progn
+;;            (require 'org-ac)
+;;	    (org-ac/config-default)
+;;          ))
+;;   #+END_SRC
+** Org-capture 
+*** Binding C-c c to org-capture
+    #+BEGIN_SRC emacs-lisp
+    (global-set-key (kbd "\C-c c") 'org-capture)
+    #+END_SRC
+*** Setting up org-capture files list
+    #+BEGIN_SRC emacs-lisp
+    (custom-set-variables
+     '(org-directory (concat (getenv "DROPBOX_DIR") "/orgfiles"))
+     '(org-default-notes-file (concat org-directory "/worklog.org"))
+    )
+    (setq org-capture-templates
+     '(("a" "Appointment" entry (file+datetree org-default-notes-file "Appointments")
+     "* TODO %?\n:PROPERTIES:\n\n:END:\nDEADLINE: %^T \n %i\n")
+     ("q" "Note" entry (file+headline org-default-notes-file "Notes")
+     "* Note %?\n%T")
+     ("l" "Link" entry (file+headline org-default-notes-file "Links")
+     "* %? %^L %^g \n%T" :prepend t)
+     ("b" "Blog idea" entry (file+headline org-default-notes-file "Blog Topics:")
+     "* %?\n%T" :prepend t)
+     ("t" "To Do Item" entry (file+headline org-default-notes-file "To Do Items")
+     "* %?\n%T" :prepend t)
+     ("h" "Eaton HIP" entry (file+headline org-default-notes-file "Eaton HIP")
+     "* %?\n%T" :prepend t)
+     ("e" "Electrolyzer PHIL" entry (file+headline org-default-notes-file "Electrolyzer PHIL")
+     "* %?\n%T" :prepend t)
+     ("o" "OptGrid" entry (file+headline org-default-notes-file "OptGrid")
+     "* %?\n%T" :prepend t)
+     ("n" "NMG" entry (file+headline org-default-notes-file "NMG")
+     "* %?\n%T" :prepend t)
+     ("m" "East Campus Modeling" entry (file+headline org-default-notes-file "East Campus Modeling")
+     "* %?\n%T" :prepend t)
+     ("j" "Journal" entry (file+datetree org-default-notes-file)
+     "* %?\nEntered on %U\n  %i\n  %a")
+     ("s" "Screencast" entry (file org-default-notes-file
+     "* %?\n%i\n"))))
+    #+END_SRC
+** Org-agenda
+*** Binding C-c a to org-agenda
+    #+BEGIN_SRC emacs-lisp
+    (global-set-key (kbd "\C-c a") 'org-agenda)    
+    #+END_SRC
+*** Setting up org-agenda files list
+    #+BEGIN_SRC emacs-lisp
+    (setq org-agenda-files (list (concat org-directory "/calendar.org")))
+    #+END_SRC
 ** Org-Mode Bullets
     #+BEGIN_SRC emacs-lisp  
     (use-package org-bullets
@@ -190,7 +303,7 @@ Add tabs to scroll using mouse between buffers
      :after org
      :init
      (setq reftex-default-bibliography '((concat (getenv "DROPBOX_DIR") "/Research/references.bib")))
-     (setq org-ref-bibliography-notes (concat (getenv "DROPBOX_DIR") "/Research/notes/notes.org")
+     (setq org-ref-bibliography-notes (concat (getenv "DROPBOX_DIR") "/Research/notes/worklog.org")
            org-ref-default-bibliography '((concat (getenv "DROPBOX_DIR") "/Research/references.bib"))
            org-ref-pdf-directory (concat (getenv "DROPBOX_DIR") "/papers/"))
    
@@ -201,7 +314,7 @@ Add tabs to scroll using mouse between buffers
            (lambda (fpath)
              (start-process "open" "*open*" "open" fpath)))
    
-     (setq helm-bibtex-notes-path (concat (getenv "DROPBOX_DIR") "/Research/notes/notes.org"))
+     (setq helm-bibtex-notes-path (concat (getenv "DROPBOX_DIR") "/Research/notes/worklog.org"))
      :config
      (key-chord-define-global "uu" 'org-ref-cite-hydra/body)
      ;; variables that control bibtex key format for auto-generation
@@ -242,4 +355,33 @@ Add tabs to scroll using mouse between buffers
                   ("\\subsection{%s}" . "\\subsection*{%s}")
                   ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
    #+END_SRC
+** Highlight sentences
+   Very useful when editing sentences in org-mode
+   #+BEGIN_SRC emacs-lisp
+   (use-package hl-sentence
+   :ensure t
+   :config
+   (require 'hl-sentence)
+   (add-hook 'org-mode-hook 'hl-sentence-mode 1)
+   (setq sentence-end-double-space nil)
    
+   ;; Configuring the appearance of the highlighted sentence
+   (set-face-attribute 'hl-sentence nil
+                       :background "#665555"))
+   #+END_SRC
+** Sentence Navigation
+   Forward and backward navigation between sentences (using Key chords)
+   #+BEGIN_SRC emacs-lisp
+   (use-package sentence-navigation
+   :ensure t
+   ;; autoloads will be created for all commands and text objects
+   ;; when installed with package.el
+   :defer t
+   :init
+   (key-chord-define-global "sd" 'sentence-nav-forward)
+   (key-chord-define-global "sa" 'sentence-nav-backward))
+   #+END_SRC
+** Default Text Navigation/Transpose Key-chords
+   #+BEGIN_SRC emacs-lisp
+   (key-chord-define-global "es" 'transpose-sentences)
+   #+END_SRC

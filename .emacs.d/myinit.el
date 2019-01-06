@@ -48,14 +48,6 @@ mc/cua-rectangle-to-multiple-cursors
  (eval-after-load 'cua-base
  '(bind-key "C-. C-," 'mc/cua-rectangle-to-multiple-cursors cua--rectangle-keymap))))
 
-(use-package smartparens
- :ensure t
- :config
-
- (setq sp-show-pair-from-inside nil)
- (require 'smartparens-config)
- :diminish smartparens-mode)
-
 (use-package monokai-theme
 :ensure t
 :config (load-theme 'monokai t))
@@ -107,46 +99,110 @@ mc/cua-rectangle-to-multiple-cursors
     (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
     ))
 
-(use-package avy
-  :ensure t
-  :bind ("M-s" . avy-goto-char))
-
-(use-package company
-  :ensure t
-  :defer 5
-  :config
-  (global-company-mode t))
-
-(use-package auto-complete
-  :ensure t
-  :init
-  (progn
-    (ac-config-default)
-    (global-auto-complete-mode t)
-    ))
-
 (use-package expand-region
   :ensure t
   :config
   (global-set-key (kbd "C-=") 'er/expand-region))
 
-(use-package try
-:ensure t)
+(use-package smartparens
+ :ensure t
+ :config
 
-(use-package flycheck
-  :ensure t
-  :init
-  (global-flycheck-mode t))
+ (setq sp-show-pair-from-inside nil)
+ (require 'smartparens-config)
+ (smartparens-global-mode t)
+ (show-smartparens-global-mode t)
 
-(use-package ace-window
-  :ensure t
-  :init
-  (progn
-    (global-set-key [remap other-window] 'ace-window)
-    (custom-set-faces
-     '(aw-leading-char-face
-       ((t (:inherit ace-jump-face-foreground :height 3.0))))) ;;Makes the window name more distinguishable
-    ))
+ ;; keybinding management
+ (define-key smartparens-mode-map (kbd "C-M-f") 'sp-forward-sexp)
+ (define-key smartparens-mode-map (kbd "C-M-b") 'sp-backward-sexp)
+
+ (define-key smartparens-mode-map (kbd "C-M-d") 'sp-down-sexp)
+ (define-key smartparens-mode-map (kbd "C-M-a") 'sp-backward-down-sexp)
+ (define-key smartparens-mode-map (kbd "C-S-d") 'sp-beginning-of-sexp)
+ (define-key smartparens-mode-map (kbd "C-S-a") 'sp-end-of-sexp)
+
+ (define-key smartparens-mode-map (kbd "C-M-e") 'sp-up-sexp)
+ (define-key smartparens-mode-map (kbd "C-M-u") 'sp-backward-up-sexp)
+ (define-key smartparens-mode-map (kbd "C-M-t") 'sp-transpose-sexp)
+
+ (define-key smartparens-mode-map (kbd "C-M-n") 'sp-forward-hybrid-sexp)
+ (define-key smartparens-mode-map (kbd "C-M-p") 'sp-backward-hybrid-sexp)
+
+ (define-key smartparens-mode-map (kbd "C-M-k") 'sp-kill-sexp)
+ (define-key smartparens-mode-map (kbd "C-M-w") 'sp-copy-sexp)
+
+ (define-key smartparens-mode-map (kbd "M-<delete>") 'sp-unwrap-sexp)
+ (define-key smartparens-mode-map (kbd "M-<backspace>") 'sp-backward-unwrap-sexp)
+
+ (define-key smartparens-mode-map (kbd "C-S-<right>") 'sp-forward-slurp-sexp)
+ (define-key smartparens-mode-map (kbd "C-S-<left>") 'sp-forward-barf-sexp)
+ (define-key smartparens-mode-map (kbd "C-M-<left>") 'sp-backward-slurp-sexp)
+ (define-key smartparens-mode-map (kbd "C-M-<right>") 'sp-backward-barf-sexp)
+
+ (define-key smartparens-mode-map (kbd "M-D") 'sp-splice-sexp)
+ (define-key smartparens-mode-map (kbd "C-M-<delete>") 'sp-splice-sexp-killing-forward)
+ (define-key smartparens-mode-map (kbd "C-M-<backspace>") 'sp-splice-sexp-killing-backward)
+ (define-key smartparens-mode-map (kbd "C-S-<backspace>") 'sp-splice-sexp-killing-around)
+
+ (define-key smartparens-mode-map (kbd "C-]") 'sp-select-next-thing-exchange)
+ (define-key smartparens-mode-map (kbd "C-<left_bracket>") 'sp-select-previous-thing)
+ (define-key smartparens-mode-map (kbd "C-M-]") 'sp-select-next-thing)
+
+ (define-key smartparens-mode-map (kbd "M-F") 'sp-forward-symbol)
+ (define-key smartparens-mode-map (kbd "M-B") 'sp-backward-symbol)
+
+ (define-key smartparens-mode-map (kbd "C-i") 'sp-change-inner)
+ (define-key smartparens-mode-map (kbd "M-i") 'sp-change-enclosing)
+
+ (bind-key "C-c f" (lambda () (interactive) (sp-beginning-of-sexp 2)) smartparens-mode-map)
+ (bind-key "C-c b" (lambda () (interactive) (sp-beginning-of-sexp -2)) smartparens-mode-map)
+
+
+ :diminish smartparens-mode)
+
+(custom-set-variables
+ '(org-directory (concat (getenv "DROPBOX_DIR") "/orgfiles"))
+ '(org-default-notes-file (concat org-directory "/worklog.org"))
+ '(org-export-html-postamble nil)
+ '(org-startup-indented-t)
+)
+
+(global-set-key (kbd "\C-c c") 'org-capture)
+
+(custom-set-variables
+ '(org-directory (concat (getenv "DROPBOX_DIR") "/orgfiles"))
+ '(org-default-notes-file (concat org-directory "/worklog.org"))
+)
+(setq org-capture-templates
+ '(("a" "Appointment" entry (file+datetree org-default-notes-file "Appointments")
+ "* TODO %?\n:PROPERTIES:\n\n:END:\nDEADLINE: %^T \n %i\n")
+ ("q" "Note" entry (file+headline org-default-notes-file "Notes")
+ "* Note %?\n%T")
+ ("l" "Link" entry (file+headline org-default-notes-file "Links")
+ "* %? %^L %^g \n%T" :prepend t)
+ ("b" "Blog idea" entry (file+headline org-default-notes-file "Blog Topics:")
+ "* %?\n%T" :prepend t)
+ ("t" "To Do Item" entry (file+headline org-default-notes-file "To Do Items")
+ "* %?\n%T" :prepend t)
+ ("h" "Eaton HIP" entry (file+headline org-default-notes-file "Eaton HIP")
+ "* %?\n%T" :prepend t)
+ ("e" "Electrolyzer PHIL" entry (file+headline org-default-notes-file "Electrolyzer PHIL")
+ "* %?\n%T" :prepend t)
+ ("o" "OptGrid" entry (file+headline org-default-notes-file "OptGrid")
+ "* %?\n%T" :prepend t)
+ ("n" "NMG" entry (file+headline org-default-notes-file "NMG")
+ "* %?\n%T" :prepend t)
+ ("m" "East Campus Modeling" entry (file+headline org-default-notes-file "East Campus Modeling")
+ "* %?\n%T" :prepend t)
+ ("j" "Journal" entry (file+datetree org-default-notes-file)
+ "* %?\nEntered on %U\n  %i\n  %a")
+ ("s" "Screencast" entry (file org-default-notes-file
+ "* %?\n%i\n"))))
+
+(global-set-key (kbd "\C-c a") 'org-agenda)
+
+(setq org-agenda-files (list (concat org-directory "/calendar.org")))
 
 (use-package org-bullets
 :ensure t
@@ -158,7 +214,7 @@ mc/cua-rectangle-to-multiple-cursors
   :after org
   :init
   (setq reftex-default-bibliography '((concat (getenv "DROPBOX_DIR") "/Research/references.bib")))
-  (setq org-ref-bibliography-notes (concat (getenv "DROPBOX_DIR") "/Research/notes/notes.org")
+  (setq org-ref-bibliography-notes (concat (getenv "DROPBOX_DIR") "/Research/notes/worklog.org")
         org-ref-default-bibliography '((concat (getenv "DROPBOX_DIR") "/Research/references.bib"))
         org-ref-pdf-directory (concat (getenv "DROPBOX_DIR") "/papers/"))
 
@@ -169,7 +225,7 @@ mc/cua-rectangle-to-multiple-cursors
         (lambda (fpath)
           (start-process "open" "*open*" "open" fpath)))
 
-  (setq helm-bibtex-notes-path (concat (getenv "DROPBOX_DIR") "/Research/notes/notes.org"))
+  (setq helm-bibtex-notes-path (concat (getenv "DROPBOX_DIR") "/Research/notes/worklog.org"))
   :config
   (key-chord-define-global "uu" 'org-ref-cite-hydra/body)
   ;; variables that control bibtex key format for auto-generation
@@ -207,3 +263,13 @@ mc/cua-rectangle-to-multiple-cursors
                   ("\\section{%s}" . "\\section*{%s}")
                   ("\\subsection{%s}" . "\\subsection*{%s}")
                   ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
+
+(use-package hl-sentence
+:ensure t
+:config
+(require 'hl-sentence)
+(add-hook 'org-mode-hook 'hl-sentence-mode 1)
+
+;; Configuring the appearance of the highlighted sentence
+(set-face-attribute 'hl-sentence nil
+                    :background "#555555"))

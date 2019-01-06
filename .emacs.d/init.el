@@ -25,8 +25,14 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(org-agenda-files
+   '("~/Desktop/Dropbox/Apps/Overleaf/NREL_Journal_HIL_test_Electrolyzer/paper_outline.org"))
+ '(org-default-notes-file (concat org-directory "/worklog.org"))
+ '(org-directory (concat (getenv "DROPBOX_DIR") "/orgfiles"))
+ '(org-export-html-postamble nil)
+ '(org-startup-indented-t nil)
  '(package-selected-packages
-   '(org-ref smartparens evil-surround evil-leader evil try expand-region yasnippet flycheck auto-complete company counsel ace-window tabbar org-bullets which-key monokai-theme mc-extras multiple-cursors key-chord use-package)))
+   '(sentence-navigation hl-sentence org-ac org-ref smartparens evil-surround evil-leader evil try expand-region yasnippet flycheck auto-complete company counsel ace-window tabbar org-bullets which-key monokai-theme mc-extras multiple-cursors key-chord use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
