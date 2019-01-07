@@ -5,10 +5,9 @@
 
 (use-package key-chord
   :ensure t
-  :init
-  (key-chord-define-global "lk" 'forward-char)
   :config
   (require 'key-chord)
+  (setq key-chord-two-keys-delay 0.05) ; default 0.1
   (key-chord-mode 1))
 
 (defun my-bell-function ())  ;;Defines an arbitrary function which does nothing
@@ -16,6 +15,36 @@
 (setq visible-bell nil)
 
 (global-set-key (kbd "C-M-q") 'visual-line-mode)  ;;Allows toggle of word wrapping
+
+(defun reverse-transpose-sentences (arg)
+"Interchange the current sentence with the previous one.
+With prefix argument ARG a non-zero integer, moves the current
+sentence past ARG sentences, leaving point after the current sentence.
+If ARG is positive, moves the current sentence forwards, if
+ARG is negative moves it backwards.  If ARG is zero, exchanges
+the current sentence with the one containing the mark."
+(interactive "*p")
+(transpose-subr 'backward-sentence arg))
+
+(defun reverse-transpose-words (arg)
+"Interchange the current sentence with the previous one.
+With prefix argument ARG a non-zero integer, moves the current
+sentence past ARG sentences, leaving point after the current sentence.
+If ARG is positive, moves the current sentence forwards, if
+ARG is negative moves it backwards.  If ARG is zero, exchanges
+the current sentence with the one containing the mark."
+(interactive "*p")
+(transpose-subr 'backward-word arg))
+
+(defun reverse-transpose-chars (arg)
+"Interchange the current sentence with the previous one.
+With prefix argument ARG a non-zero integer, moves the current
+sentence past ARG sentences, leaving point after the current sentence.
+If ARG is positive, moves the current sentence forwards, if
+ARG is negative moves it backwards.  If ARG is zero, exchanges
+the current sentence with the one containing the mark."
+(interactive "*p")
+(transpose-subr 'backward-char arg))
 
 (use-package multiple-cursors
 :ensure t
@@ -203,7 +232,6 @@ mc/cua-rectangle-to-multiple-cursors
 (global-set-key (kbd "\C-c a") 'org-agenda)
 
 (setq org-agenda-files (list (concat org-directory "/calendar.org")))
- :diminish smartparens-mode)
 
 (use-package org-bullets
 :ensure t
@@ -270,7 +298,39 @@ mc/cua-rectangle-to-multiple-cursors
 :config
 (require 'hl-sentence)
 (add-hook 'org-mode-hook 'hl-sentence-mode 1)
+(setq sentence-end-double-space nil)
 
 ;; Configuring the appearance of the highlighted sentence
 (set-face-attribute 'hl-sentence nil
-                    :background "#555555"))
+                    :background "#665555"))
+
+(use-package sentence-navigation
+:ensure t
+;; autoloads will be created for all commands and text objects
+;; when installed with package.el
+:defer t
+:init
+(key-chord-define-global "sd" 'sentence-nav-forward)
+(key-chord-define-global "sa" 'sentence-nav-backward))
+
+;; Keychords for Transposition
+(key-chord-define-global "es" 'transpose-sentences)
+(key-chord-define-global "w3" 'transpose-words)
+(key-chord-define-global "-p" 'transpose-paragraphs)
+(key-chord-define-global "pl" 'transpose-lines)
+(key-chord-define-global "fc" 'transpose-chars)
+
+;; Keychords for Navigation
+(key-chord-define-global "vc" 'forward-char)
+(key-chord-define-global "xc" 'backward-char)
+(key-chord-define-global "ew" 'forward-word)
+(key-chord-define-global "wq" 'backward-word)
+(key-chord-define-global ";l" 'next-line)
+(key-chord-define-global "lk" 'previous-line)
+
+;; Repeat command chord
+(key-chord-define-global "rr" 'universal-argument)
+(key-chord-define-global "lo" "\M--\C-x\C-t") ;;Reverse-transpose-word
+
+(key-chord-define-global "w2" 'reverse-transpose-sentences)
+(key-chord-define-global "lo" 'reverse-transpose-sentences)

@@ -11,9 +11,6 @@
    #+BEGIN_SRC emacs-lisp
      (use-package key-chord
        :ensure t
-       :init
-       (key-chord-define-global "vc" 'forward-char)
-       (key-chord-define-global "xc" 'backward-char)
        :config
        (require 'key-chord)
        (setq key-chord-two-keys-delay 0.05) ; default 0.1
@@ -42,7 +39,93 @@
    #+BEGIN_SRC emacs-lisp
      (global-set-key (kbd "C-M-q") 'visual-line-mode)  ;;Allows toggle of word wrapping
    #+END_SRC
+* My custom functions
+** Reverse Transpose (c-har, w-ord, s-entence)
+   #+BEGIN_SRC emacs-lisp
+   (defun reverse-transpose-sentences (arg)
+   "Interchange the current sentence with the previous one.
+   With prefix argument ARG a non-zero integer, moves the current
+   sentence past ARG sentences, leaving point after the current sentence.
+   If ARG is positive, moves the current sentence forwards, if
+   ARG is negative moves it backwards.  If ARG is zero, exchanges
+   the current sentence with the one containing the mark."
+   (interactive "*p")
+   (if (not (eobp))
+       (forward-char))
+   (org-backward-sentence)
+   (forward-char)
+   (transpose-subr 'backward-sentence arg))
+
+   (defun reverse-transpose-words (arg)
+   "Interchange the current sentence with the previous one.
+   With prefix argument ARG a non-zero integer, moves the current
+   sentence past ARG sentences, leaving point after the current sentence.
+   If ARG is positive, moves the current sentence forwards, if
+   ARG is negative moves it backwards.  If ARG is zero, exchanges
+   the current sentence with the one containing the mark."
+   (interactive "*p")
+   (transpose-subr 'backward-word arg))
+
+   (defun reverse-transpose-chars (arg)
+   "Interchange the current sentence with the previous one.
+   With prefix argument ARG a non-zero integer, moves the current
+   sentence past ARG sentences, leaving point after the current sentence.
+   If ARG is positive, moves the current sentence forwards, if
+   ARG is negative moves it backwards.  If ARG is zero, exchanges
+   the current sentence with the one containing the mark."
+   (interactive "*p")
+   (transpose-subr 'backward-char arg))
    
+   (defun move-line-up ()
+    "Move up the current line."
+    (interactive)
+    (transpose-lines 1)
+    (forward-line -2)
+    (indent-according-to-mode))
+
+   #+END_SRC
+** Better forward-transpose-sentences, forward-transpose-lines
+   #+BEGIN_SRC emacs-lisp
+   (defun better-transpose-sentences (arg)
+   "Interchange the current sentence with the previous one.
+   With prefix argument ARG a non-zero integer, moves the current
+   sentence past ARG sentences, leaving point after the current sentence.
+   If ARG is positive, moves the current sentence forwards, if
+   ARG is negative moves it backwards.  If ARG is zero, exchanges
+   the current sentence with the one containing the mark."
+   (interactive "*p")
+   ;;(if (boundp 'preceding-char)
+   ;;    (backward-char))
+   (if (not (bobp))
+      (backward-char))
+   (org-forward-sentence)
+   (backward-char)
+   (transpose-subr 'forward-sentence arg))   
+
+   (defun better-transpose-lines (arg)
+   "Interchange the current sentence with the previous one.
+   With prefix argument ARG a non-zero integer, moves the current
+   sentence past ARG sentences, leaving point after the current sentence.
+   If ARG is positive, moves the current sentence forwards, if
+   ARG is negative moves it backwards.  If ARG is zero, exchanges
+   the current sentence with the one containing the mark."
+   (interactive "*p")
+   ;;(if (boundp 'preceding-char)
+   ;;    (backward-char))
+   (org-end-of-line)
+   (if (not (eobp))
+      (next-line))
+   (transpose-lines arg)
+   (previous-line))
+
+   (defun move-line-down ()
+    "Move down the current line."
+    (interactive)
+    (forward-line 1)
+    (transpose-lines 1)
+    (forward-line -1)
+    (indent-according-to-mode))
+   #+END_SRC
 * Installing Packages
 ** Multiple-Cursors
    #+BEGIN_SRC emacs-lisp
@@ -383,5 +466,27 @@ Add tabs to scroll using mouse between buffers
    #+END_SRC
 ** Default Text Navigation/Transpose Key-chords
    #+BEGIN_SRC emacs-lisp
-   (key-chord-define-global "es" 'transpose-sentences)
-   #+END_SRC
+   ;; Keychords for Navigation
+   (key-chord-define-global "vc" 'forward-char)
+   (key-chord-define-global "xc" 'backward-char)
+   (key-chord-define-global "ew" 'forward-word)
+   (key-chord-define-global "wq" 'backward-word)
+   (key-chord-define-global ";l" 'next-line)
+   (key-chord-define-global "lk" 'previous-line)
+
+   ;; Repeat command chord
+   (key-chord-define-global "rr" 'universal-argument)
+
+   ;; Keychords for Transposition
+   (key-chord-define-global "se" 'better-transpose-sentences)
+   (key-chord-define-global "w3" 'transpose-words)
+   (key-chord-define-global "p-" 'transpose-paragraphs)
+   (key-chord-define-global "pl" 'move-line-down)
+   (key-chord-define-global "fc" 'transpose-chars)
+
+   (key-chord-define-global "sq" 'reverse-transpose-sentences)
+   (key-chord-define-global "w2" 'reverse-transpose-words)
+   (key-chord-define-global "li" 'move-line-up)
+   (key-chord-define-global "cd" 'reverse-transpose-chars)
+      #+END_SRC
+
