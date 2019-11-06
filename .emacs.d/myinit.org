@@ -1,3 +1,7 @@
+* Template
+  #+BEGIN_SRC emacs-lisp
+
+  #+END_SRC
 * Initialization Tweaks
 ** Initial setup defaults
    #+BEGIN_SRC emacs-lisp  
@@ -5,17 +9,6 @@
    (tool-bar-mode -1)                            ;;Disables the toolbar
    (fset 'yes-or-no-p 'y-or-n-p)                 ;;Allows using y/n for yes/no
    (global-set-key (kbd "<f5>") 'revert-buffer)  ;;Allows reloading a buffer using F5 directly
-   #+END_SRC
-** Enable Key-chords
-   Allows using simultaneous key presses to do custom functions
-   #+BEGIN_SRC emacs-lisp
-     (use-package key-chord
-       :ensure t
-       :init
-       (key-chord-define-global "lk" 'forward-char)
-       :config
-       (require 'key-chord)
-       (key-chord-mode 1))
    #+END_SRC
 ** Muting the bell in Emacs
    Mute the bell in emacs
@@ -38,9 +31,8 @@
    
 ** Auto-wrap long lines
    #+BEGIN_SRC emacs-lisp
-     (global-set-key (kbd "C-M-q") 'visual-line-mode)  ;;Allows toggle of word wrapping
+     (global-set-key (kbd "<f6>") 'visual-line-mode)  ;;Allows toggle of word wrapping
    #+END_SRC
-   
 * Installing Packages
 ** Multiple-Cursors
    #+BEGIN_SRC emacs-lisp
@@ -97,15 +89,6 @@
      :ensure t
      :config (which-key-mode))
    #+END_SRC
-
-** Org-mode stuff
-*** Org-Mode Bullets
-     #+BEGIN_SRC emacs-lisp  
-     (use-package org-bullets
-     :ensure t
-     :config
-     (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
-     #+END_SRC
 ** I-do mode
    ;;Interactive-do - Allows more informative interaction in the mode-bar
    #+BEGIN_SRC emacs-lisp  
@@ -256,7 +239,30 @@
     
     (key-chord-define-global "fg" 'forward-char)
 #+END_SRC
+* Enable/Define Key-chords
+  Allows using simultaneous key presses to do custom functions
+  #+BEGIN_SRC emacs-lisp
+    (use-package key-chord
+      :ensure t
+      :init
+      (setq key-chord-two-key-delay 0.02)
+      (key-chord-define-global "fg" 'forward-word)
+      (key-chord-define-global "fd" 'backward-word)
+      (key-chord-define-global "xc" 'forward-sentence)
+      (key-chord-define-global "xz" 'backward-sentence)
+      :config
+      (require 'key-chord)
+      (key-chord-mode 1))
+  #+END_SRC
 * Org-Mode specific
+** Org-mode stuff
+*** Org-Mode Bullets
+     #+BEGIN_SRC emacs-lisp  
+     (use-package org-bullets
+     :ensure t
+     :config
+     (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+     #+END_SRC
 ** defining a new class: Book
    #+BEGIN_SRC emacs-lisp
 (with-eval-after-load 'ox-latex
@@ -267,4 +273,21 @@
                   ("\\section{%s}" . "\\section*{%s}")
                   ("\\subsection{%s}" . "\\subsection*{%s}")
                   ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
+   #+END_SRC
+* Custom Configurations (largely adopted from Steve Purcell)
+** Add custom functions directory (/.emacs.d/lisp) to the list of functions 
+   #+BEGIN_SRC emacs-lisp
+   (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
+   #+END_SRC
+** Misc functions from Purcell (Do not move lower in the sequece)
+   #+BEGIN_SRC emacs-lisp
+   (require 'init-utils)
+   #+END_SRC
+** Custom Variables
+   #+BEGIN_SRC emacs-lisp
+   (defconst *is-a-mac* (eq system-type 'darwin))
+   #+End_SRC
+** Enable OSX bindings: Switching the behavior of cmd and option keys
+   #+BEGIN_SRC emacs-lisp
+   (require 'init-osx-keys)
    #+END_SRC
