@@ -1,0 +1,478 @@
+* Template
+  #+BEGIN_SRC emacs-lisp
+
+  #+END_SRC
+* Initialization Tweaks
+** Initial setup defaults
+   #+BEGIN_SRC emacs-lisp  
+   (setq inhibit-startup-message t)              ;;Prevents the initial load screen 
+   (tool-bar-mode -1)                            ;;Disables the toolbar
+   (fset 'yes-or-no-p 'y-or-n-p)                 ;;Allows using y/n for yes/no
+   (global-set-key (kbd "<f5>") 'revert-buffer)  ;;Allows reloading a buffer using F5 directly
+   #+END_SRC
+** Muting the bell in Emacs
+   Mute the bell in emacs
+   #+BEGIN_SRC emacs-lisp  
+   (defun my-bell-function ())  ;;Defines an arbitrary function which does nothing
+   (setq ring-bell-function 'ignore) ;; remaps the bell function to be ignored
+   (setq visible-bell nil)
+   #+END_SRC
+
+** Highlight current line
+   #+BEGIN_SRC 
+   (global-hl-line-mode t)
+   #+END_SRC
+
+** Auto-reload the file if it changes on the disk
+   #+BEGIN_SRC 
+   (global-auto-revert-mode 1)
+   (setq auto-revert-verbose nil)
+   #+END_SRC
+   
+** Auto-wrap long lines
+   #+BEGIN_SRC emacs-lisp
+     (global-set-key (kbd "<f6>") 'visual-line-mode)  ;;Allows toggle of word wrapping
+   #+END_SRC
+** Delete whole line with C-k
+   #+BEGIN_SRC emacs-lisp
+     (setq kill-whole-line t)
+   #+END_SRC
+** Enable certificates and TLS
+   #+BEGIN_SRC emacs-lisp
+;;     (setq gnutls-verify-error nil)
+;;     (setq tls-checktrust nil)
+   #+END_SRC
+** Disable pop-ups
+   #+BEGIN_SRC emacs-lisp
+;;     (setq x-gtk-use-system-tooltips nil)
+;;     (setq use-dialog-box nil)
+   #+END_SRC
+** Use ESC as C-g
+   #+BEGIN_SRC emacs-lisp
+     (define-key key-translation-map (kbd "ESC") (kbd "C-g"))
+   #+END_SRC
+* Installing Packages
+** Multiple-Cursors
+   #+BEGIN_SRC emacs-lisp
+   (use-package multiple-cursors
+   :ensure t
+   :bind (("C-S-c C-S-c" . mc/edit-lines)
+   ("C->" . mc/mark-next-like-this)
+   ("C-<" . mc/mark-previous-like-this)
+   ("C-c C-<" . mc/mark-all-like-this)
+   ("C-c C-* C-*" . mc/mark-more-like-this)
+   ("C-* i" . mc/insert-numbers)
+   ("C-* s" . mc/sort-regions)
+   ("C-* r" . mc/reverse-regions)
+   ("M-<mouse-1>" . mc/add-cursor-on-click))
+   :init
+   (global-unset-key (kbd "M-<down-mouse-1>"))
+   :config
+   (require 'mc-extras))
+   #+END_SRC
+*** MC-extras - Additional functionalities for Multiple cursors 
+   #+BEGIN_SRC emacs-lisp
+    (use-package mc-extras
+    :ensure t
+    :commands 
+    (mc/compare-chars mc/compare-chars-backward mc/compare-chars-forward
+    mc/cua-rectangle-to-multiple-cursors
+     mc/remove-current-cursor mc/remove-duplicated-cursors)
+     :config
+     (progn
+     (bind-keys :map mc/keymap
+     ("C-. C-d" . mc/remove-current-cursor)
+     ("C-. d" . mc/remove-duplicated-cursors)
+     ("C-. =" . mc/compare-chars))
+     (eval-after-load 'cua-base
+     '(bind-key "C-. C-," 'mc/cua-rectangle-to-multiple-cursors cua--rectangle-keymap))))
+     #+END_SRC
+;;** Par-edit
+   For managing paranthesis everywhere (editing, and organizing)
+   #+BEGIN_SRC emacs-lisp
+   
+   
+   #+END_SRC
+** Winner-mode
+   Manage (go forward and backward) window configurations
+   #+BEGIN_SRC emacs-lisp  
+     (winner-mode 1)
+   #+END_SRC
+** Evil-mode
+   #+BEGIN_SRC emacs-lisp
+     (use-package evil
+       :ensure t ;; install the evil package if not installed
+       :init ;; tweak evil's configuration before loading it
+         (setq evil-search-module 'evil-search)
+         (setq evil-ex-complete-emacs-commands nil)
+         (setq evil-vsplit-window-right t)
+         (setq evil-split-window-below t)
+         (setq evil-shift-round nil)
+         (setq evil-want-C-u-scroll t)
+       :config ;; tweak evil after loading it
+         (evil-mode)
+	 ;; example how to map a command in normal mode (called 'normal state' in evil)
+	 (define-key evil-normal-state-map (kbd ", w") 'evil-window-vsplit))
+   #+END_SRC
+** Spacemacs like Leader for Evil-mode
+   #+BEGIN_SRC emacs-lisp
+     (use-package general :ensure t
+       :config
+         (general-define-key
+	  :states '(normal visual insert emacs)
+	  :prefix "SPC"
+	  :non-normal-prefix "S-SPC"
+
+	  ;; simple command
+	  "'"   '(iterm-focus :which-key "iterm")
+	  "?"   '(iterm-goto-filedir-or-home :which-key "iterm - goto dir")
+	  "/"   'counsel-ag
+	  "TAB" '(switch-to-other-buffer :which-key "prev buffer")
+	  "SPC" '(avy-goto-word-or-subword-1  :which-key "go to char")
+
+	  ;; Applications
+	  "a" '(:ignore t :which-key "Applications")
+	  "ar" 'ranger
+	  "ad" 'dired))
+   #+END_SRC
+** Changing theme
+   #+BEGIN_SRC emacs-lisp
+   (use-package monokai-theme
+   :ensure t
+   :config (load-theme 'monokai t))
+   #+END_SRC
+** Which-key
+   Helps information on the keys 
+   #+BEGIN_SRC emacs-lisp  
+   (use-package which-key
+     :ensure t
+     :config (which-key-mode))
+;;          (setq echo-keystrokes 3))
+   #+END_SRC
+** I-do mode
+   ;;Interactive-do - Allows more informative interaction in the mode-bar
+   #+BEGIN_SRC emacs-lisp  
+   (setq indo-enable-flex-matching t)
+   (setq ido-everywhere t)
+   (ido-mode 1)
+   #+END_SRC
+
+** iBuffer
+   ;; A nicer buffer listing to manage buffers with a nicer interface
+#+BEGIN_SRC emacs-lisp  
+(defalias 'list-buffers 'ibuffer-other-window)
+#+END_SRC
+
+** Tab-bar for tabbed browsing
+   Adds tabs to scroll using mouse between buffers
+#+BEGIN_SRC emacs-lisp  
+(use-package tabbar
+  :ensure t
+  :config
+  (tabbar-mode 1))
+#+END_SRC
+
+** ace-window - To move between the windows
+   Easier way to move between the windows
+#+BEGIN_SRC emacs-lisp
+(use-package ace-window
+  :ensure t
+  :init
+  (progn
+    (global-set-key [remap other-window] 'ace-window)
+    (custom-set-faces
+     '(aw-leading-char-face
+       ((t (:inherit ace-jump-face-foreground :height 3.0))))) ;;Makes the window name more distinguishable
+    ))
+#+END_SRC
+
+** Counsel - for finding (Browsing files)
+   Alternative way for finding files (Modified key map for a better kill ring)
+   #+BEGIN_SRC emacs-lisp  
+     (use-package counsel
+       :ensure t
+       :bind ;;Makes the yanking-kill-ring so much cooler!!
+       (("M-y" . counsel-yank-pop)
+        :map ivy-minibuffer-map
+        ("M-y" . ivy-next-line)))
+   #+END_SRC
+
+** Swiper - for search
+   A better way for moving around and search than the default
+#+BEGIN_SRC emacs-lisp  
+(use-package swiper
+  :ensure t
+  :bind (("C-s" . swiper)
+	 ("C-r" . swiper)
+	 ("C-c C-r" . ivy-resume)
+	 ("M-x" . counsel-M-x)
+	 ("C-x C-f" . counsel-find-file))
+  :config
+  (progn
+    (ivy-mode 1)
+    (setq ivy-use-virtual-buffers t)
+    (setq enable-recursive-minibuffers t)
+    (global-set-key (kbd "<f1> f") 'counsel-describe-function)
+    (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
+    (global-set-key (kbd "<f1> l") 'counsel-find-library)
+    (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
+    ))
+#+END_SRC
+
+** Avy - Better Ace-jump-mode
+   A superior ace-jump-mode to allow jumping within anywhere in the buffer
+#+BEGIN_SRC emacs-lisp  
+(use-package avy
+  :ensure t
+  :bind ("M-s" . avy-goto-char))
+#+END_SRC
+
+;;** Company - Autocomletion
+   Allows autocompletion for most packages
+#+BEGIN_SRC emacs-lisp
+(use-package company
+  :ensure t
+  :defer 5
+  :config
+  (global-company-mode t))
+
+#+END_SRC
+** AutoComplete - Autocomletion
+   Allows autocompletion for most packages
+#+BEGIN_SRC emacs-lisp
+  (use-package auto-complete
+    :ensure t
+    :init
+    (progn
+      (ac-config-default)
+      (global-auto-complete-mode t)
+      ))
+#+END_SRC
+** Flycheck - Syntax check
+   Checks the syntax for most programming environments (not Matlab)
+   #+BEGIN_SRC emacs-lisp
+    (use-package flycheck
+      :ensure t
+      :init
+      (global-flycheck-mode t))
+   #+END_SRC
+** YASnippet - For inserting snippets
+   #+BEGIN_SRC emacs-lisp
+   (use-package yasnippet
+   :ensure t
+   :init
+   (yas-global-mode 1))
+   #+END_SRC
+** Expand Region Tool
+   Expands the selected region to the next set of braces
+   (C-=) - Then use = to expand, - to contract and 0 to reset
+   #+BEGIN_SRC emacs-lisp
+     (use-package expand-region
+       :ensure t
+       :config
+       (global-set-key (kbd "C-=") 'er/expand-region))
+   #+END_SRC
+** SmartParens
+   #+BEGIN_SRC emacs-lisp
+    (use-package smartparens-config
+      :ensure smartparens
+      :config (progn (show-smartparens-global-mode t))
+              (sp-local-pair 'org-mode "`" "'") ;; adds `' as a local pair in org-mode
+	     )
+    (add-hook 'org-mode-hook 'turn-on-smartparens-strict-mode)
+;;    (add-hook 'prog-mode-hook 'turn-on-smartparens-strict-mode)
+;;    (add-hook 'markdown-mode-hook 'turn-on-smartparens-strict-mode)
+   #+END_SRC
+** I-edit
+** Try package
+   Allows trying a package without using it
+   #+BEGIN_SRC emacs-lisp  
+   (use-package try
+   :ensure t)
+   #+END_SRC
+** Packages
+;;An autocomplete package - Company
+;;(use-package
+
+#+BEGIN_SRC 
+;; Max time delay between two key presses to be considered a key chord
+    (setq key-chord-two-keys-delay 0.1) ; default 0.1
+    
+    ;; Max time delay between two presses of the same key to be considered a key chord.
+    ;; Should normally be a little longer than `key-chord-two-keys-delay'.
+    (setq key-chord-one-key-delay 0.2) ; default 0.2
+    
+    (key-chord-define-global "fg" 'forward-char)
+#+END_SRC
+* Enable/Define Key-chords
+  Allows using simultaneous key presses to do custom functions
+  #+BEGIN_SRC emacs-lisp
+    (use-package key-chord
+      :ensure t
+      :init
+      (setq key-chord-two-key-delay 0.02)
+      (key-chord-define-global "fg" 'forward-word)
+      (key-chord-define-global "fd" 'backward-word)
+      (key-chord-define-global "xc" 'forward-sentence)
+      (key-chord-define-global "xz" 'backward-sentence)
+      (key-chord-define-global "sd" 'evil-force-normal-state)
+      :config
+      (require 'key-chord)
+      (key-chord-mode 1))
+  #+END_SRC
+* Org-capture specific
+   #+BEGIN_SRC emacs-lisp
+   (setq org-directory "~/Dropbox/orgfiles")
+   (setq org-default-notes-file "~/Dropbox/orgfiles/refile.org")
+   
+   ;; I use C-c c to start capture mode
+   (global-set-key (kbd "C-c c") 'org-capture)
+   
+   ;; Capture templates for: TODO tasks, Notes, appointments, phone calls, meetings, and org-protocol
+   (setq org-capture-templates
+         (quote (("t" "todo" entry (file "~/Dropbox/orgfiles/refile.org")
+                  "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
+                 ("r" "respond" entry (file "~/Dropbox/orgfiles/refile.org")
+                  "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
+                 ("n" "note" entry (file "~/Dropbox/orgfiles/refile.org")
+                  "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
+                 ("i" "Idea" entry (file "~/Dropbox/orgfiles/refile.org")
+                  "* %? :IDEAS:\n%U\n%a\n" :clock-in t :clock-resume t)
+                 ("j" "Journal" entry (file+datetree "~/Dropbox/orgfiles/diary.org")
+                  "* %?\n%U\n" :clock-in t :clock-resume t)
+                 ("w" "org-protocol" entry (file "~/Dropbox/orgfiles/refile.org")
+                  "* TODO Review %c\n%U\n" :immediate-finish t)
+                 ("m" "Meeting" entry (file "~/Dropbox/orgfiles/refile.org")
+                  "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
+                 ("p" "Phone call" entry (file "~/Dropbox/orgfiles/refile.org")
+                  "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
+                 ("h" "Habit" entry (file "~/Dropbox/orgfiles/refile.org")
+                  "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n"))))
+   #+END_SRC
+* Org-refile setup
+#   #+BEGIN_SRC emacs-lisp
+#   
+#   ; Targets include this file and any file contributing to the agenda - up to 9 levels deep
+#   (setq org-refile-targets (quote ((nil :maxlevel . 9)
+#                                    (org-agenda-files :maxlevel . 9))))
+#   
+#   ; Use full outline paths for refile targets - we file directly with IDO
+#   (setq org-refile-use-outline-path t)
+#   
+#   ; Targets complete directly with IDO
+#   (setq org-outline-path-complete-in-steps nil)
+#   
+#   ; Allow refile to create parent tasks with confirmation
+#   (setq org-refile-allow-creating-parent-nodes (quote confirm))
+#   
+#   ; Use IDO for both buffer and file completion and ido-everywhere to t
+#   (setq org-completion-use-ido t)
+#   (setq ido-everywhere t)
+#   (setq ido-max-directory-size 100000)
+#   (ido-mode (quote both))
+#   ; Use the current window when visiting files and buffers with ido
+#   (setq ido-default-file-method 'selected-window)
+#   (setq ido-default-buffer-method 'selected-window)
+#   ; Use the current window for indirect buffer display
+#   (setq org-indirect-buffer-display 'current-window)
+#   
+#   ;;;; Refile settings
+#   ; Exclude DONE state tasks from refile targets
+#   (defun bh/verify-refile-target ()
+#     "Exclude todo keywords with a done state from refile targets"
+#     (not (member (nth 2 (org-heading-components)) org-done-keywords)))
+#   
+#   (setq org-refile-target-verify-function 'bh/verify-refile-target)
+#      
+#   #+END_SRC
+* Custom Configurations (largely adopted from Steve Purcell)
+** Add custom functions directory (/.emacs.d/lisp) to the list of functions 
+   #+BEGIN_SRC emacs-lisp
+   (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
+   (add-to-list 'load-path (concat (getenv "HOME") "/.emacs.d/org-ref/"))
+   #+END_SRC
+** Misc functions from Purcell (Do not move lower in the sequece)
+   #+BEGIN_SRC emacs-lisp
+   (require 'init-utils)
+   #+END_SRC
+** Custom Variables
+   #+BEGIN_SRC emacs-lisp
+   (defconst *is-a-mac* (eq system-type 'darwin))
+   #+End_SRC
+** Enable OSX bindings: Switching the behavior of cmd and option keys
+   #+BEGIN_SRC emacs-lisp
+   (require 'init-osx-keys)
+   #+END_SRC
+* Org-Mode specific
+** Packages
+*** Org-Mode Bullets
+     #+BEGIN_SRC emacs-lisp  
+     (use-package org-bullets
+     :ensure t
+     :config
+     (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+     #+END_SRC
+*** Org-ref dependencies
+    #+BEGIN_SRC emacs-lisp
+    ;; Install dash
+    (use-package dash
+    :ensure t)
+    
+    ;; Install htmlize
+    (use-package htmlize
+    :ensure t)
+    
+    ;; Install helm
+    (use-package helm
+    :ensure t
+    :config (progn
+	    (setq helm-buffers-fuzzy-matching t)))
+    
+    ;; Install helm-bibtex
+    (use-package helm-bibtex
+    :ensure t)
+    
+    ;; Install ivy
+    (use-package ivy
+    :ensure t)
+    
+    ;; Install hydra
+    (use-package hydra
+    :ensure t)
+    
+    ;; Install key-chord
+    (use-package key-chord
+    :ensure t)
+    
+    ;; Install s
+    (use-package s
+    :ensure t)
+    
+    (use-package f
+    :ensure t)
+    
+    ;; Install use-package pdf-tools
+    (use-package pdf-tools
+    :ensure t)
+        
+    ;; Install END_SRC
+    #+END_SRC
+*** Org-ref
+    #+BEGIN_SRC emacs-lisp
+    (require 'org-ref)
+    (setq reftex-default-bibliography '("~/Dropbox/bibliography/zotero-library.bib"))
+    (setq org-ref-default-bibliography '("~/Dropbox/bibliography/zotero-library.bib"))
+    (setq org-ref-pdf-directory '("~/PDFs"))
+    #+END_SRC
+** defining a new class: Book
+   #+BEGIN_SRC emacs-lisp
+(with-eval-after-load 'ox-latex
+   (add-to-list 'org-latex-classes
+                '("rj_thesis"
+                  "\\documentclass{report}"
+                  ("\\chapter{%s}" . "\\chapter*{%s}")
+                  ("\\section{%s}" . "\\section*{%s}")
+                  ("\\subsection{%s}" . "\\subsection*{%s}")
+                  ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
+   #+END_SRC
+   
