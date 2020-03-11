@@ -21,14 +21,15 @@
 ** Highlight current line
    #+BEGIN_SRC 
    (global-hl-line-mode t)
+   (set-face-background 'hl-line "#996666")
+   (set-face-foreground 'highlight nil)
+   (set-face-attribute 'region nil :background "#9966cc")
    #+END_SRC
-
 ** Auto-reload the file if it changes on the disk
    #+BEGIN_SRC 
    (global-auto-revert-mode 1)
    (setq auto-revert-verbose nil)
    #+END_SRC
-   
 ** Auto-wrap long lines
    #+BEGIN_SRC emacs-lisp
      (global-set-key (kbd "<f6>") 'visual-line-mode)  ;;Allows toggle of word wrapping
@@ -59,7 +60,7 @@
    :bind (("C-S-c C-S-c" . mc/edit-lines)
    ("C->" . mc/mark-next-like-this)
    ("C-<" . mc/mark-previous-like-this)
-   ("C-c C-<" . mc/mark-all-like-this)
+   ("C-(" . mc/mark-all-like-this)
    ("C-c C-* C-*" . mc/mark-more-like-this)
    ("C-* i" . mc/insert-numbers)
    ("C-* s" . mc/sort-regions)
@@ -113,8 +114,20 @@
          (evil-mode)
 	 ;; example how to map a command in normal mode (called 'normal state' in evil)
 	 (define-key evil-normal-state-map (kbd ", w") 'evil-window-vsplit))
+	 ;; (key-chord-define-global "sd" 'evil-force-normal-state)
+      
+	 ;; Changing the color of mode-line to red when in EVIL mode
+	 (setq original-background (face-attribute 'mode-line :background))
+	 (setq normal-state-background "#ff0000")
+	 (add-hook 'evil-normal-state-entry-hook
+           (lambda ()
+           (set-face-attribute 'mode-line nil :background normal-state-background)))
+	 (add-hook 'evil-normal-state-exit-hook
+           (lambda ()
+           (set-face-attribute 'mode-line nil :background original-background)))
    #+END_SRC
 ** Spacemacs like Leader for Evil-mode
+   Ref: https://sam217pa.github.io/2016/09/02/how-to-build-your-own-spacemacs/
    #+BEGIN_SRC emacs-lisp
      (use-package general :ensure t
        :config
@@ -315,7 +328,6 @@
       (key-chord-define-global "fd" 'backward-word)
       (key-chord-define-global "xc" 'forward-sentence)
       (key-chord-define-global "xz" 'backward-sentence)
-      (key-chord-define-global "sd" 'evil-force-normal-state)
       :config
       (require 'key-chord)
       (key-chord-mode 1))
